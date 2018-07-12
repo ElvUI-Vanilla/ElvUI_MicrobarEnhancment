@@ -1,12 +1,12 @@
-﻿local E, L, V, P, G =  unpack(ElvUI); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
-local AB = E:GetModule("ActionBars");
-local EP = LibStub("LibElvUIPlugin-1.0");
-local S = E:GetModule("Skins");
-local addon = ...
+﻿local E, L, V, P, G =  unpack(ElvUI) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local AB = E:GetModule("ActionBars")
+local EP = LibStub("LibElvUIPlugin-1.0")
+local S = E:GetModule("Skins")
 
 --Cache global variables
 --Lua functions
 local _G = _G
+local getn = table.getn
 --WoW API / Variables
 local COLOR = COLOR
 
@@ -23,8 +23,8 @@ function AB:GetOptions()
 		type = "group",
 		name = "Microbar Enhancement",
 		guiInline = true,
-		get = function(info) return E.db.actionbar.microbar[ info[#info] ] end,
-		set = function(info, value) E.db.actionbar.microbar[ info[#info] ] = value AB:UpdateMicroPositionDimensions() end,
+		get = function(info) return E.db.actionbar.microbar[ info[getn(info)] ] end,
+		set = function(info, value) E.db.actionbar.microbar[ info[getn(info)] ] = value AB:UpdateMicroPositionDimensions() end,
 		args = {
 			backdrop = {
 				order = 1,
@@ -36,7 +36,7 @@ function AB:GetOptions()
 				order = 2,
 				type = "range",
 				name = L["Backdrop Spacing"],
-				min = 0, max = 10, step = 1,
+				min = 0, max = 8, step = 1,
 				disabled = function() return not AB.db.microbar.enabled or not AB.db.microbar.backdrop end,
 			},
 			transparentBackdrop = {
@@ -84,11 +84,9 @@ local MICRO_BUTTONS = {
 	["CharacterMicroButton"] = L["CHARACTER_SYMBOL"],
 	["SpellbookMicroButton"] = L["SPELLBOOK_SYMBOL"],
 	["TalentMicroButton"] = L["TALENTS_SYMBOL"],
-	["AchievementMicroButton"] = L["ACHIEVEMENT_SYMBOL"],
 	["QuestLogMicroButton"] = L["QUEST_SYMBOL"],
 	["SocialsMicroButton"] = L["SOCIAL_SYMBOL"],
-	["PVPMicroButton"] = L["PVP_SYMBOL"],
-	["LFDMicroButton"] = L["LFD_SYMBOL"],
+	["WorldMapMicroButton"] = L["WORLDMAP_SYMBOL"],
 	["MainMenuMicroButton"] = L["MENU_SYMBOL"],
 	["HelpMicroButton"] = L["HELP_SYMBOL"]
 }
@@ -101,15 +99,15 @@ function AB:SetSymbloColor()
 	end
 end
 
-local function onEnter(self)
+local function onEnter()
 	if AB.db.microbar.symbolic then
-		S.SetModifiedBackdrop(self)
+		S.SetModifiedBackdrop(this)
 	end
 end
 
-local function onLeave(self)
+local function onLeave()
 	if AB.db.microbar.symbolic then
-		S.SetOriginalBackdrop(self)
+		S.SetOriginalBackdrop(this)
 	end
 end
 
@@ -117,13 +115,13 @@ local oldHandleMicroButton = AB.HandleMicroButton
 function AB:HandleMicroButton(button)
 	oldHandleMicroButton(self, button)
 
-	button:HookScript("OnEnter", onEnter)
-	button:HookScript("OnLeave", onLeave)
+	HookScript(button, "OnEnter", onEnter)
+	HookScript(button, "OnLeave", onLeave)
 
 	local text = MICRO_BUTTONS[button:GetName()]
 	button.text = button:CreateFontString(nil, "BORDER")
-	button.text:FontTemplate()
-	button.text:SetPoint("CENTER", button, "CENTER", 0, -1)
+	E:FontTemplate(button.text)
+	button.text:SetPoint("CENTER", button, "CENTER", 0, -16)
 	button.text:SetJustifyH("CENTER")
 	button.text:SetText(text)
 end
@@ -133,11 +131,11 @@ function AB:UpdateMicroPositionDimensions()
 	oldUpdateMicroPositionDimensions(self)
 
 	if not ElvUI_MicroBar.backdrop then
-		ElvUI_MicroBar:CreateBackdrop("Transparent")
+		E:CreateBackdrop(ElvUI_MicroBar, "Transparent")
 	end
 
-	ElvUI_MicroBar.backdrop:SetTemplate(AB.db.microbar.transparentBackdrop and "Transparent" or "Default")
-	ElvUI_MicroBar.backdrop:SetOutside(ElvUI_MicroBar, AB.db.microbar.backdropSpacing, AB.db.microbar.backdropSpacing)
+	E:SetTemplate(ElvUI_MicroBar.backdrop, AB.db.microbar.transparentBackdrop and "Transparent" or "Default")
+	E:SetOutside(ElvUI_MicroBar.backdrop, ElvUI_MicroBar, AB.db.microbar.backdropSpacing, AB.db.microbar.backdropSpacing)
 
 	if AB.db.microbar.backdrop then
 		ElvUI_MicroBar.backdrop:Show()
@@ -163,7 +161,7 @@ function AB:UpdateMicroPositionDimensions()
 end
 
 function AB:EnhancementInit()
-	EP:RegisterPlugin(addon, AB.GetOptions)
+	EP:RegisterPlugin("ElvUI_MicrobarEnhancement", AB.GetOptions)
 end
 
 hooksecurefunc(AB, "SetupMicroBar", AB.EnhancementInit)
