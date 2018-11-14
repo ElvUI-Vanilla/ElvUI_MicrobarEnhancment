@@ -1,7 +1,7 @@
-﻿local E, L, V, P, G =  unpack(ElvUI) --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
-local AB = E:GetModule("ActionBars")
-local EP = LibStub("LibElvUIPlugin-1.0")
-local S = E:GetModule("Skins")
+﻿local E, L, V, P, G =  unpack(ElvUI); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
+local AB = E:GetModule("ActionBars");
+local EP = LibStub("LibElvUIPlugin-1.0");
+local S = E:GetModule("Skins");
 
 --Cache global variables
 --Lua functions
@@ -17,11 +17,53 @@ P.actionbar.microbar.transparentBackdrop = false
 P.actionbar.microbar.classColor = false
 P.actionbar.microbar.colorS = {r = 1, g = 1, b = 1}
 
+MicroButtonPortrait:SetDrawLayer("ARTWORK")
+
+local function ColorizeSettingName(settingName)
+	return format("|cff1784d1%s|r", settingName)
+end
+
 function AB:GetOptions()
-	E.Options.args.actionbar.args.microbar.args.microbarEnhanced = {
+	if not E.Options.args.elvuiPlugins then
+		E.Options.args.elvuiPlugins = {
+			order = 50,
+			type = "group",
+			name = "|cff175581E|r|cffC4C4C4lvUI_|r|cff175581P|r|cffC4C4C4lugins|r",
+			args = {
+				header = {
+					order = 0,
+					type = "header",
+					name = "|cff175581E|r|cffC4C4C4lvUI_|r|cff175581P|r|cffC4C4C4lugins|r"
+				},
+				microbarEnhancedShortcut = {
+					type = "execute",
+					name = ColorizeSettingName("Microbar Enhancement"),
+					func = function()
+						if IsAddOnLoaded("ElvUI_Config") then
+							local ACD = LibStub("AceConfigDialog-3.0")
+							ACD:SelectGroup("ElvUI", "actionbar", "microbarEnhanced")
+						end
+					end
+				}
+			}
+		}
+	elseif not E.Options.args.elvuiPlugins.args.microbarEnhancedShortcut then
+		E.Options.args.elvuiPlugins.args.microbarEnhancedShortcut = {
+			type = "execute",
+			name = ColorizeSettingName("Microbar Enhancement"),
+			func = function()
+				if IsAddOnLoaded("ElvUI_Config") then
+					local ACD = LibStub("AceConfigDialog-3.0")
+					ACD:SelectGroup("ElvUI", "actionbar", "microbar")
+				end
+			end
+		}
+	end
+
+ 	E.Options.args.actionbar.args.microbar.args.microbarEnhanced = {
 		order = 10,
 		type = "group",
-		name = "Microbar Enhancement",
+		name = ColorizeSettingName("Microbar Enhancement"),
 		guiInline = true,
 		get = function(info) return E.db.actionbar.microbar[ info[getn(info)] ] end,
 		set = function(info, value) E.db.actionbar.microbar[ info[getn(info)] ] = value AB:UpdateMicroPositionDimensions() end,
