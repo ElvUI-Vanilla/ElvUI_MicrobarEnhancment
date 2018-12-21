@@ -141,15 +141,15 @@ function AB:SetSymbloColor()
 	end
 end
 
-local function onEnter()
+local function onEnter(self)
 	if AB.db.microbar.symbolic then
-		S.SetModifiedBackdrop(this)
+		S.SetModifiedBackdrop(self)
 	end
 end
 
-local function onLeave()
+local function onLeave(self)
 	if AB.db.microbar.symbolic then
-		S.SetOriginalBackdrop(this)
+		S.SetOriginalBackdrop(self)
 	end
 end
 
@@ -161,9 +161,9 @@ function AB:HandleMicroButton(button)
 	HookScript(button, "OnLeave", onLeave)
 
 	local text = MICRO_BUTTONS[button:GetName()]
-	button.text = button:CreateFontString(nil, "BORDER")
+	button.text = button:CreateFontString(nil, "OVERLAY")
 	E:FontTemplate(button.text)
-	button.text:SetPoint("CENTER", button, "CENTER", 0, -16)
+	button.text:SetPoint("CENTER", button, "CENTER", 0, -1)
 	button.text:SetJustifyH("CENTER")
 	button.text:SetText(text)
 end
@@ -190,17 +190,16 @@ function AB:UpdateMicroPositionDimensions()
 
 		if AB.db.microbar.symbolic then
 			b:DisableDrawLayer("ARTWORK")
-			b:DisableDrawLayer("OVERLAY")
-			b:EnableDrawLayer("BORDER")
+			b:EnableDrawLayer("OVERLAY")
 		else
 			b:EnableDrawLayer("ARTWORK")
-			b:EnableDrawLayer("OVERLAY")
-			b:DisableDrawLayer("BORDER")
+			b:DisableDrawLayer("OVERLAY")
 		end
 	end
 
 	AB:SetSymbloColor()
 end
+
 
 function AB:EnhancementInit()
 	EP:RegisterPlugin("ElvUI_MicrobarEnhancement", AB.GetOptions)
