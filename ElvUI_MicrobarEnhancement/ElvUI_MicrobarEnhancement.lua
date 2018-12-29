@@ -41,7 +41,7 @@ function AB:GetOptions()
 					func = function()
 						if IsAddOnLoaded("ElvUI_Config") then
 							local ACD = LibStub("AceConfigDialog-3.0")
-							ACD:SelectGroup("ElvUI", "actionbar", "microbarEnhanced")
+							ACD:SelectGroup("ElvUI", "actionbar", "microbar")
 						end
 					end
 				}
@@ -141,24 +141,9 @@ function AB:SetSymbloColor()
 	end
 end
 
-local function onEnter(self)
-	if AB.db.microbar.symbolic then
-		S.SetModifiedBackdrop(self)
-	end
-end
-
-local function onLeave(self)
-	if AB.db.microbar.symbolic then
-		S.SetOriginalBackdrop(self)
-	end
-end
-
 local oldHandleMicroButton = AB.HandleMicroButton
 function AB:HandleMicroButton(button)
 	oldHandleMicroButton(self, button)
-
-	HookScript(button, "OnEnter", onEnter)
-	HookScript(button, "OnLeave", onLeave)
 
 	local text = MICRO_BUTTONS[button:GetName()]
 	button.text = button:CreateFontString(nil, "OVERLAY")
@@ -173,7 +158,7 @@ function AB:UpdateMicroPositionDimensions()
 	oldUpdateMicroPositionDimensions(self)
 
 	if not ElvUI_MicroBar.backdrop then
-		E:CreateBackdrop(ElvUI_MicroBar, "Transparent")
+		E:CreateBackdrop(ElvUI_MicroBar)
 	end
 
 	E:SetTemplate(ElvUI_MicroBar.backdrop, AB.db.microbar.transparentBackdrop and "Transparent" or "Default")
@@ -183,6 +168,12 @@ function AB:UpdateMicroPositionDimensions()
 		ElvUI_MicroBar.backdrop:Show()
 	else
 		ElvUI_MicroBar.backdrop:Hide()
+	end
+
+	if AB.db.microbar.mouseover and not MouseIsOver(ElvUI_MicroBar) then
+		ElvUI_MicroBar.backdrop:SetAlpha(0)
+	else
+		ElvUI_MicroBar.backdrop:SetAlpha(1)
 	end
 
 	for button in pairs(MICRO_BUTTONS) do
